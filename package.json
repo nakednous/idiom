@@ -1,0 +1,32 @@
+{
+  "name": "@nakednous/idiom",
+  "version": "0.0.1",
+  "description": "idiom \u2014 the bridges' shared composite layer: targets, passes, pipe, state. Internal, zero renderer.",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/"
+  ],
+  "keywords": [
+    "webgl",
+    "webgpu",
+    "render-target",
+    "pass",
+    "internal"
+  ],
+  "author": "Jean Pierre Charalambos <nakednous@gmail.com>",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nakednous/idiom.git"
+  },
+  "dependencies": {
+    "@nakednous/tree": "^0.0.34"
+  }
+}
