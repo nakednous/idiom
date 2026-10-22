@@ -1,0 +1,34 @@
+/**
+ * @file idiom — the bridges' shared composite layer: targets, passes, `pipe`,
+ * `state`.
+ * @module idiom
+ * @license AGPL-3.0-only
+ *
+ * A bridge owns a backend for its API and a record per context; this package
+ * owns the composites both bridges would otherwise write twice. Every verb
+ * takes the context record first, never a `gl` or a device, so a key stays the
+ * bridge's:
+ *
+ * ```
+ * const ctx = createContext(backend)          // in the bridge's own registry
+ * const target = renderTarget(ctx, opts)
+ * filter(ctx, prog, uniforms, input)
+ * const pair = state(ctx, opts)
+ * disposeContext(ctx)                         // the bridge's dispose calls this first
+ * ```
+ *
+ * A backend is the bridge's own object, implementing the interface this
+ * package states: targets, programs, uniforms, buffers, draws, textures,
+ * readback, viewport and state, and the API's four conventions. The package
+ * ships a recording backend for its tests; it names no GPU API itself.
+ */
+
+'use strict';
+
+export { createContext, disposeContext } from './registry.js';
+export { renderTarget, SCREEN } from './target.js';
+export {
+  program, fullscreen, filter, image, pipe, releasePipe,
+  RED, GREEN, BLUE, ALPHA, RGB, NORMAL, ADD, MULTIPLY,
+} from './pass.js';
+export { state } from './state.js';
