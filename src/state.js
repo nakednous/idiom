@@ -64,7 +64,7 @@ export function state(ctx, opts) {
   const o = opts || {};
   const clear = o.clear || ZERO;
   // one colour texture per side: renderTarget's sampling and format options only
-  const spec = { width: o.width, height: o.height, format: o.format, float: o.float, minMag: o.minMag, wrap: o.wrap };
+  const spec = { width: o.width, height: o.height, depth: false, format: o.format, float: o.float, minMag: o.minMag, wrap: o.wrap };
   const A = renderTarget(ctx, spec);
   const B = renderTarget(ctx, spec);
   const backend = ctx.backend;

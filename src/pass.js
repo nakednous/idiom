@@ -63,6 +63,7 @@ const WHITE = [1, 1, 1, 1];
 const _rect = new Float32Array(16);
 const _res = [0, 0];
 const _texel = [0, 0];
+const _values = {};   // filter's derived uniforms, reused per pass and consumed at its draw
 
 /**
  * A fullscreen-pass program from a fragment shader alone: the backend supplies
@@ -140,7 +141,8 @@ export function filter(ctx, prog, uniforms, input) {
   const prior = backend.setState(ctx, { depth: false });
   const tex = input && typeof input === 'object' && input.color ? input.color : input;
   backend.setUniforms(ctx, prog, uniforms);
-  const values = {};
+  const values = _values;
+  for (const name in values) delete values[name];
   let filled = false;
   for (const name of _samplers(ctx, prog)) {
     if (uniforms && uniforms[name] !== undefined) continue;      // the bag's own value wins

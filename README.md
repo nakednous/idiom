@@ -9,6 +9,17 @@ backend is supplied by each bridge (twgl in `webgl.tree`, `webgpu-utils` in `web
 package never touches a GPU API itself.
 
 The interface is the specification and the conformance suite is its executable half: a recording fake
-backend asserts the composite call sequence of every verb, and an export manifest pins the surface.
+backend asserts the composite call sequence of every verb, an export/arity manifest pins the surface,
+the restore contracts pin what each verb leaves as it found it, and the dependency line is a test.
 
-Status: `0.0.x`, the package's first build. Nothing imports it yet.
+```
+createContext(backend) · disposeContext(ctx)
+renderTarget(ctx, opts) · SCREEN
+program(ctx, frag) · fullscreen(ctx) · filter(ctx, prog, uniforms, input)
+image(ctx, tex, opts) · pipe(ctx, source, passes, opts) · releasePipe(ctx, key)
+state(ctx, opts)
+```
+
+Status: `0.0.x`, the package's first build — targets, passes, `pipe` and `state`, proven against the
+fake; picking, textures, the space mappings, the draw policy and the camera install are later stages.
+Nothing imports it yet. Gates: `npm test`, `npm run build`.
