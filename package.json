@@ -1,7 +1,7 @@
 {
   "name": "@nakednous/idiom",
-  "version": "0.0.1",
-  "description": "idiom — the bridges' shared composite layer: targets, passes, pipe, state. Internal, zero renderer.",
+  "version": "0.0.2",
+  "description": "idiom — the bridges' shared composite layer: targets, passes, pipe, state, the draw policy. Internal, zero renderer.",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
