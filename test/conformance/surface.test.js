@@ -39,8 +39,9 @@ test('the interface list is complete, unique and the fake implements it', () => 
   assert.equal(new Set(MEMBERS).size, MEMBERS.length, 'no member is named twice');
   for (const name of ['createTarget', 'destroyTarget', 'bindTarget', 'clear', 'createProgram', 'imageProgram',
     'uniformsOf', 'samplersOf', 'setUniforms', 'setCamera', 'draw', 'drawInstanced', 'createBuffer',
-    'updateBuffer', 'readPixels', 'createTexture', 'uploadTexture', 'destroyTexture', 'textureSize',
-    'setViewport', 'setState', 'dispose']) assert.ok(MEMBERS.includes(name), name);
+    'updateBuffer', 'writeBuffer', 'readPixels', 'createTexture', 'uploadTexture', 'destroyTexture',
+    'textureSize', 'setViewport', 'setState', 'dispose']) assert.ok(MEMBERS.includes(name), name);
+  assert.equal(MEMBERS.length, 23);
   assert.deepEqual(CONVENTIONS, ['ndcZMin', 'uvOrientation', 'framebufferY', 'format']);
   assert.deepEqual(checkBackend(createFake().backend), []);
 });

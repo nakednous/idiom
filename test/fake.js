@@ -6,6 +6,8 @@
 
 'use strict';
 
+import { mat4Mul } from '@nakednous/tree';
+
 /** The conventions a WebGL backend would state; the fake's are its own, pinned. */
 export const CONVENTIONS = Object.freeze({
   ndcZMin: -1,
@@ -126,16 +128,28 @@ export function createFake(opts) {
     uniformsOf(p) { calls.push(['uniformsOf', p.id]); const d = declarations.get(p); return d ? d.uniforms.slice() : []; },
     samplersOf(p) { calls.push(['samplersOf', p.id]); const d = declarations.get(p); return d ? d.samplers.slice() : []; },
     setUniforms(ctx, p, values) { calls.push(['setUniforms', p.id, snapshot(values)]); world.program = p; },
-    setCamera(ctx, V, P) { calls.push(['setCamera', V, P]); },
+    setCamera(ctx, V, P) {
+      calls.push(['setCamera', V, P]);
+      // the interface's record shape: the install leaves V, P and P · V stated
+      for (let i = 0; i < 16; i++) { ctx.V[i] = V[i]; ctx.P[i] = P[i]; }
+      mat4Mul(ctx.PV, ctx.P, ctx.V);
+    },
     draw(ctx, p, geometry) { calls.push(['draw', p.id, geometry.id]); },
     drawInstanced(ctx, p, geometry, count) { calls.push(['drawInstanced', p.id, geometry.id, count]); },
-    createBuffer(ctx, arrays) {
+    createBuffer(ctx, arrays, opts) {
       const b = { id: 'buffer' + (++seq), arrays };
       buffers.push(b);
-      calls.push(['createBuffer', b.id]);
+      calls.push(['createBuffer', b.id, opts || null]);
       return b;
     },
-    updateBuffer(ctx, b, arrays) { calls.push(['updateBuffer', b.id]); },
+    updateBuffer(ctx, b, arrays, opts) {
+      b.arrays = arrays;
+      calls.push(['updateBuffer', b.id, opts || null]);
+    },
+    writeBuffer(ctx, b, arrays) {
+      b.arrays = arrays;
+      calls.push(['writeBuffer', b.id, arrays]);
+    },
     readPixels(ctx, t, x, y, width, height) { calls.push(['readPixels', t.id, x, y, width, height]); return new Uint8Array(4); },
     createTexture(ctx, descriptor) { const tex = texture(null, 0, 0); calls.push(['createTexture', descriptor, tex.id]); return tex; },
     uploadTexture(ctx, tex, source) { calls.push(['uploadTexture', tex.id]); },

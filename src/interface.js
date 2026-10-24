@@ -15,14 +15,45 @@
  * targets   createTarget · destroyTarget · bindTarget · clear
  * programs  createProgram · imageProgram · uniformsOf · samplersOf · setUniforms
  * draws     setCamera · draw · drawInstanced
- * buffers   createBuffer · updateBuffer
+ * buffers   createBuffer · updateBuffer · writeBuffer
  * picking   readPixels
  * textures  createTexture · uploadTexture · destroyTexture · textureSize
  * state     setViewport · setState
  * context   dispose
  * ```
  *
- * The members that read or set a piece of API state — `bindTarget`,
+ * Binding. `bindTarget(ctx, target)` is the layer's own: the composites call
+ * it, and an application binds a target with its API's own call — twgl's
+ * `bindFramebufferInfo`, the twin's pass. No `beginPass`, `screen` or `clear`
+ * verb is published; `SCREEN` is what `bindTarget` takes for the canvas.
+ *
+ * Programs. `createProgram(ctx, source, opts)` compiles a source into a program
+ * record; `opts` is the backend's own — a WebGPU backend takes the vertex
+ * layout its pipeline bakes (`buffers`) and its entry names, twgl takes none,
+ * and a geometry's layout is the application's statement through its bridge's
+ * `program`. `imageProgram(ctx)` is the flat texture program `image` draws
+ * with, the mirror of `createProgram`, its vertex stage the backend's.
+ * `uniformsOf(prog)` and `samplersOf(prog)` name what a program declares;
+ * `setUniforms(ctx, prog, values)` uploads a bag by name, and a value applies to
+ * the draw that follows.
+ *
+ * Records. A target is the backend's own record: it carries `resize(w, h)` and
+ * `resolve()`, which this layer calls and decorates, and `dispose()` is the
+ * layer's. A program record is identified by `.program` — the API's program
+ * object or module — and a `pipe` entry is a bag iff it carries a `uniforms`
+ * key, `{ program, uniforms }`; every other entry is a program record itself.
+ * `setCamera(ctx, V, P)` leaves `V`, `P` and `P · V` stated on the record, where
+ * the draw policy reads them; `MV`, `MVP` and the normal matrix are the
+ * record's scratch.
+ *
+ * Buffers. `createBuffer(ctx, arrays, opts)` and `updateBuffer(ctx, geometry,
+ * arrays, opts)` take an optional creation-options argument, the API's own —
+ * `{ interleave, usage }` on the twin, none on twgl. `writeBuffer(ctx, geometry,
+ * arrays)` is the in-place write: it rewrites the geometry's own buffers, and a
+ * queue write is ordered with submissions rather than inside a command buffer,
+ * so a stream's draw owns a slot of its frame.
+ *
+ * State. The members that read or set a piece of API state — `bindTarget`,
  * `setViewport`, `setState` — return what was in effect before the call, and
  * take no value (or `undefined`) to ask only. A composite restores what it
  * found by handing that token back, so no member exists only to read state.
@@ -47,7 +78,7 @@ export const MEMBERS = [
   'createTarget', 'destroyTarget', 'bindTarget', 'clear',
   'createProgram', 'imageProgram', 'uniformsOf', 'samplersOf', 'setUniforms',
   'setCamera', 'draw', 'drawInstanced',
-  'createBuffer', 'updateBuffer',
+  'createBuffer', 'updateBuffer', 'writeBuffer',
   'readPixels',
   'createTexture', 'uploadTexture', 'destroyTexture', 'textureSize',
   'setViewport', 'setState',

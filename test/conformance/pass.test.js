@@ -6,6 +6,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createContext, renderTarget, program, fullscreen, filter, image, pipe, releasePipe } from '../../src/index.js';
+import { passOf } from '../../src/pass.js';
 import { createFake, namesOf } from '../fake.js';
 
 /** The target bound at the last draw: the composite's own routing. */
@@ -202,6 +203,35 @@ test('pipe: no passes shows the source as it is', () => {
   assert.equal(pipe(ctx, source, []), null);
   assert.equal(fake.calls.some((call) => call[0] === 'imageProgram'), true);
   assert.equal(fake.calls.some((call) => call[0] === 'createTarget'), false, 'no pair is allocated');
+});
+
+test('a pipe entry: the program record itself, or a bag iff it carries a `uniforms` key', () => {
+  const fake = createFake();
+  const prog = fake.program(['uCells'], []);
+  assert.deepEqual(passOf(prog), { program: prog, uniforms: null }, 'a bare program is the record, identified by .program');
+  assert.deepEqual(passOf({ program: prog, uniforms: { uCells: 8 } }), { program: prog, uniforms: { uCells: 8 } });
+  // the key is what makes a bag: an entry that carries it is never read as a program
+  assert.equal(passOf({ program: prog, uniforms: undefined }).program, prog);
+  assert.equal(passOf({ uniforms: { uCells: 8 } }), null, 'a bag needs a program');
+  assert.equal(passOf({ program: undefined }), null);
+  assert.equal(passOf(null), null);
+  assert.equal(passOf('a program'), null);
+});
+
+test('pipe: a bag stage keeps its own uniforms and a bare program stage runs beside it', () => {
+  const fake = createFake();
+  const ctx = createContext(fake.backend);
+  const source = renderTarget(ctx, { width: 16, height: 8 });
+  const pixelate = fake.program(['uCells'], []);
+  const invert = fake.program([], ['uSource']);
+  fullscreen(ctx);
+  fake.calls.length = 0;
+  pipe(ctx, source, [{ program: pixelate, uniforms: { uCells: 8 } }, invert], { display: false });
+  const ping = fake.targets().at(-2);
+  const bags = uniformsOf(fake.calls).filter(Boolean);
+  assert.deepEqual(bags[0], { uCells: 8 }, 'the bag stage keeps its bag');
+  assert.deepEqual(bags[1], { uSource: ping.color }, 'the bare stage reads the chain\'s texture');
+  assert.equal(fake.calls.filter((call) => call[0] === 'draw').length, 2);
 });
 
 test('releasePipe frees the cached pair — a named key, the default, or every pair — and only its own', () => {

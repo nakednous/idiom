@@ -95,8 +95,15 @@ export function fullscreen(ctx) {
   return ctx.quad;
 }
 
-/** The uniform names a program declares, read once per program. */
-function _declared(ctx, prog) {
+/**
+ * The uniform names a program declares, read once per program and cached on the
+ * record — the same set the draw policy reads the declared transforms from.
+ * @param {object} ctx  The context record.
+ * @param {object} prog  A program record.
+ * @returns {Set<string>} The names, empty for a program that declares none.
+ * @ignore
+ */
+export function declaredUniforms(ctx, prog) {
   let names = ctx.uniforms.get(prog);
   if (names) return names;
   names = new Set(ctx.backend.uniformsOf(prog) || []);
@@ -153,7 +160,7 @@ export function filter(ctx, prog, uniforms, input) {
         '` and neither `uniforms` nor `input` sets it — it reads whatever texture unit it holds.');
     }
   }
-  const declared = _declared(ctx, prog);
+  const declared = declaredUniforms(ctx, prog);
   if (declared.has('uResolution') || declared.has('uTexelSize')) {
     const vp = backend.setViewport(ctx);
     if (declared.has('uResolution')) { _res[0] = vp[2]; _res[1] = vp[3]; values.uResolution = _res; filled = true; }
@@ -232,16 +239,16 @@ export function image(ctx, tex, opts) {
 }
 
 /**
- * A pipe pass entry: a program, or { program, uniforms } for per-pass uniforms.
+ * A pipe pass entry: a program record (identified by `.program`, the interface's
+ * shape), or `{ program, uniforms }` — a bag iff it carries a `uniforms` key.
  * @param {object} entry
  * @returns {{ program:object, uniforms:object|null }|null}
  * @ignore
  */
 export function passOf(entry) {
-  if (!entry) return null;
-  if (entry.uniforms !== undefined) return entry.program ? { program: entry.program, uniforms: entry.uniforms } : null;
-  if (entry.program) return { program: entry, uniforms: null };
-  return null;
+  if (!entry || typeof entry !== 'object') return null;
+  if ('uniforms' in entry) return entry.program ? { program: entry.program, uniforms: entry.uniforms } : null;
+  return entry.program ? { program: entry, uniforms: null } : null;
 }
 
 /** Clear the bound target to black — pipe's default clear, over the backend. */

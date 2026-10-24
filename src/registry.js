@@ -18,16 +18,29 @@
  * The record holds the layer's bookkeeping, not API objects: the targets it
  * made, the `pipe` pairs it cached, the fullscreen geometry, the declared
  * uniform and sampler names of each program, the texture sizes `uTexelSize`
- * reads, and the program it bound last. The API objects belong to the backend
- * and are freed through it.
+ * reads, the program a bind left bound, and the camera the backend's
+ * `setCamera` installs. The API objects belong to the backend and are freed
+ * through it.
  */
 
 'use strict';
 
 import { checkBackend } from './interface.js';
 
+/** A mat4 set to the identity, in place. */
+const _identity = (m) => {
+  m.fill(0);
+  m[0] = m[5] = m[10] = m[15] = 1;
+  return m;
+};
+
 /**
  * The context record for one backend.
+ * @details The camera fields are the contract's: `setCamera` states `V`, `P`
+ * and `P · V` on the record, and the draw policy reads them; `MV`, `MVP` and
+ * `N` are the layer's scratch, written in place, so a draw allocates nothing.
+ * They start as the identity, so a draw before any camera is installed reads a
+ * defined record.
  * @param {object} backend  A backend implementing the interface.
  * @returns {object} The record every composite verb takes.
  * @example
@@ -46,7 +59,13 @@ export function createContext(backend) {
     uniforms: new WeakMap(),        // program → Set of the uniform names it declares
     samplers: new WeakMap(),        // program → the sampler names it declares
     warned: new WeakSet(),          // programs whose unset sampler was logged
-    prog: null,                     // the program the layer bound last
+    prog: null,                     // the program a bind left bound
+    V: _identity(new Float32Array(16)),    // the installed view
+    P: _identity(new Float32Array(16)),    // the installed projection
+    PV: _identity(new Float32Array(16)),   // P · V, for a draw with no model matrix
+    MV: new Float32Array(16),              // scratch: V · M
+    MVP: new Float32Array(16),             // scratch: P · V · M
+    N: new Float32Array(9),                // scratch: (V · M)⁻ᵀ, three columns
     disposed: false,
   };
 }
