@@ -145,10 +145,12 @@ export function createFake(opts) {
     updateBuffer(ctx, b, arrays, opts) {
       b.arrays = arrays;
       calls.push(['updateBuffer', b.id, opts || null]);
+      return b;
     },
     writeBuffer(ctx, b, arrays) {
       b.arrays = arrays;
       calls.push(['writeBuffer', b.id, arrays]);
+      return b;
     },
     readPixels(ctx, t, x, y, width, height) { calls.push(['readPixels', t.id, x, y, width, height]); return new Uint8Array(4); },
     createTexture(ctx, descriptor) { const tex = texture(null, 0, 0); calls.push(['createTexture', descriptor, tex.id]); return tex; },

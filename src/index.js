@@ -1,6 +1,6 @@
 /**
  * @file idiom — the bridges' shared composite layer: targets, passes, `pipe`,
- * `state`.
+ * `state`, the draw policy.
  * @module idiom
  * @license AGPL-3.0-only
  *
@@ -11,6 +11,9 @@
  *
  * ```
  * const ctx = createContext(backend)          // in the bridge's own registry
+ * const solid = buffer(ctx, mesh)             // the geometry a draw takes
+ * bind(ctx, prog)                             // the bridge's own verb
+ * draw(ctx, solid, M)                         // the declared transforms, then the draw
  * const target = renderTarget(ctx, opts)
  * filter(ctx, prog, uniforms, input)
  * const pair = state(ctx, opts)
@@ -31,4 +34,7 @@ export {
   program, fullscreen, filter, image, pipe, releasePipe,
   RED, GREEN, BLUE, ALPHA, RGB, NORMAL, ADD, MULTIPLY,
 } from './pass.js';
+export {
+  TRANSFORMS, declaredTransforms, buffer, updateBuffer, writeBuffer, install, draw,
+} from './draw.js';
 export { state } from './state.js';

@@ -14,6 +14,8 @@ const ARITY = {
   renderTarget: 2, SCREEN: null,
   program: 2, fullscreen: 1, filter: 4, image: 3, pipe: 4, releasePipe: 2,
   state: 2,
+  TRANSFORMS: null, declaredTransforms: 1,
+  buffer: 3, updateBuffer: 4, writeBuffer: 3, install: 3, draw: 4,
   RED: null, GREEN: null, BLUE: null, ALPHA: null, RGB: null,
   NORMAL: null, ADD: null, MULTIPLY: null,
 };
