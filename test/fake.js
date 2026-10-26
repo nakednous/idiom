@@ -127,7 +127,11 @@ export function createFake(opts) {
     },
     uniformsOf(p) { calls.push(['uniformsOf', p.id]); const d = declarations.get(p); return d ? d.uniforms.slice() : []; },
     samplersOf(p) { calls.push(['samplersOf', p.id]); const d = declarations.get(p); return d ? d.samplers.slice() : []; },
-    setUniforms(ctx, p, values) { calls.push(['setUniforms', p.id, snapshot(values)]); world.program = p; },
+    setUniforms(ctx, p, values) {
+      calls.push(['setUniforms', p.id, snapshot(values)]);
+      world.program = p;
+      if (values && values.uColor) world.painted = Array.from(values.uColor).map((v) => Math.round(v * 255));
+    },
     setCamera(ctx, V, P) {
       calls.push(['setCamera', V, P]);
       // the interface's record shape: the install leaves V, P and P · V stated
@@ -152,7 +156,11 @@ export function createFake(opts) {
       calls.push(['writeBuffer', b.id, arrays]);
       return b;
     },
-    readPixels(ctx, t, x, y, width, height) { calls.push(['readPixels', t.id, x, y, width, height]); return new Uint8Array(4); },
+    readPixels(ctx, t, x, y, width, height, opts) {
+      calls.push(['readPixels', t.id, x, y, width, height, !!opts]);
+      const painted = world.painted || [0, 0, 0, 255];      // what paint(id) last wrote into uColor
+      return Promise.resolve(Uint8Array.from(painted));
+    },
     createTexture(ctx, descriptor) { const tex = texture(null, (descriptor && descriptor.width) || 0, (descriptor && descriptor.height) || 0); calls.push(['createTexture', descriptor, tex.id]); return tex; },
     uploadTexture(ctx, tex, source) { calls.push(['uploadTexture', tex.id]); },
     createCubeTexture(ctx, faces, opts) { const tex = texture(null, 0, 0); calls.push(['createCubeTexture', faces.length, tex.id]); return tex; },

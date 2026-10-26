@@ -15,6 +15,7 @@ const ARITY = {
   program: 2, fullscreen: 1, filter: 4, image: 3, pipe: 4, releasePipe: 2,
   state: 2,
   CUBE_FACES: null, texture: 3, upload: 3, cubemap: 3,
+  readPixel: 5, pick: 5,
   TRANSFORMS: null, declaredTransforms: 1,
   buffer: 3, updateBuffer: 4, writeBuffer: 3, install: 3, draw: 4,
   RED: null, GREEN: null, BLUE: null, ALPHA: null, RGB: null,

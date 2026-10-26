@@ -16,6 +16,7 @@
  * draw(ctx, solid, M)                         // the declared transforms, then the draw
  * const target = renderTarget(ctx, opts)
  * const sky = cubemap(ctx, sixFaces)          // the textures' policy
+ * pick(ctx, x, y, drawFn, { vp })             // the id under a pointer, a promise
  * filter(ctx, prog, uniforms, input)
  * const pair = state(ctx, opts)
  * disposeContext(ctx)                         // the bridge's dispose calls this first
@@ -40,3 +41,4 @@ export {
 } from './draw.js';
 export { state } from './state.js';
 export { CUBE_FACES, texture, upload, cubemap } from './texture.js';
+export { readPixel, pick } from './pick.js';

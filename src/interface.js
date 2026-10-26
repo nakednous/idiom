@@ -58,6 +58,12 @@
  * take no value (or `undefined`) to ask only. A composite restores what it
  * found by handing that token back, so no member exists only to read state.
  *
+ * Picking. `readPixels(ctx, target, x, y, width, height, opts)` answers a
+ * `Promise` of RGBA bytes for a block of a target's own pixels, row 0 in the
+ * backend's `framebufferY` orientation; `opts` is the backend's own, the
+ * reference's `sync` among them. The layer's `pick` reads one pixel of a 1 × 1
+ * target through it (§7 #125).
+ *
  * Textures. `createTexture(ctx, source, opts)` takes a source or the backend's
  * own descriptor and `uploadTexture(ctx, tex, source)` refreshes one;
  * `createCubeTexture(ctx, faces, opts)` takes six sources in the cube's order
