@@ -10,11 +10,12 @@
  * ```
  *
  * **The protocol.** `readPixel` is the backend's `readPixels` for one pixel: a
- * copy of a texel, mapped back, the answer a promise. It takes a **target**,
- * never the canvas — a WebGPU canvas is a presentation surface and a GL canvas's
- * pixels are the compositor's — and a target's pixels are its own, in its own
- * orientation (the backend's `framebufferY`): row 0 at the top on WebGPU, at the
- * bottom on GL.
+ * copy of a texel, mapped back, the answer a promise. A target's pixels are its
+ * own, in its own orientation (the backend's `framebufferY`): row 0 at the top on
+ * WebGPU, at the bottom on GL. `target` is passed through as it comes — `SCREEN`
+ * (null) is the drawing buffer, which GL can read and a WebGPU presentation
+ * surface cannot, so it is the **backend** that says which reads it can answer
+ * and the bridge's verb that states the refusal (§7 #125).
  *
  * `pick` draws the scene into a **cached 1 × 1 target** under the installed
  * projection narrowed onto the query pixel by tree's `mat4Pick`, calling the
@@ -71,7 +72,8 @@ function _pickTarget(ctx) {
 /**
  * Read one pixel of a target back, asynchronously.
  * @param {object} ctx  The context record.
- * @param {object} target  A target from `renderTarget` — a target's pixels are its own.
+ * @param {object} target  A target from `renderTarget`, or `SCREEN` (null) for the drawing buffer
+ *        where the API can read it — the backend answers which.
  * @param {number} x  The pixel's column in the target, from the left.
  * @param {number} y  Its row, in the target's own orientation (`framebufferY`).
  * @param {object} [opts]  The backend's read options — the reference's `sync` among them.
@@ -81,10 +83,6 @@ function _pickTarget(ctx) {
  */
 export function readPixel(ctx, target, x, y, opts) {
   if (!ctx || !ctx.backend) return Promise.resolve(new Uint8Array(4));
-  if (!target) {
-    console.error('[idiom] readPixel: a target is required — a canvas is the compositor\'s, so a figure reads the target it drew.');
-    return Promise.resolve(new Uint8Array(4));
-  }
   return ctx.backend.readPixels(ctx, target, x | 0, y | 0, 1, 1, opts);
 }
 

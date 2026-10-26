@@ -80,15 +80,15 @@ test('pick and readPixel refuse what they cannot do, with a message and no draw'
   try {
     assert.equal(await pick(ctx, 0, 0, () => {}, {}), 0);          // no vp
     assert.equal(await pick(ctx, 0, 0, null, { vp: VP }), 0);      // no drawFn
-    const px = await readPixel(ctx, null, 0, 0);                    // no target
-    assert.deepEqual(Array.from(px), [0, 0, 0, 0]);
+    const px = await readPixel(ctx, null, 0, 0);                    // SCREEN: the backend's to answer
+    assert.equal(px.length, 4);
+    assert.deepEqual(fake.calls.at(-1).slice(1, 3), [null, 0], 'a null target reaches the backend as it came');
   } finally {
     console.error = original;
   }
   assert.match(logged.join('\n'), /opts\.vp/);
   assert.match(logged.join('\n'), /drawFn/);
-  assert.match(logged.join('\n'), /a target is required/);
-  assert.deepEqual(namesOf(fake.calls), [], 'nothing reached the backend');
+  assert.deepEqual(namesOf(fake.calls), ['readPixels'], 'only the SCREEN read reached it — no pick drew');
 });
 
 test('readPixel asks the backend for one pixel of the target it is handed', async () => {

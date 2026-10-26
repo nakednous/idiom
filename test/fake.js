@@ -157,7 +157,7 @@ export function createFake(opts) {
       return b;
     },
     readPixels(ctx, t, x, y, width, height, opts) {
-      calls.push(['readPixels', t.id, x, y, width, height, !!opts]);
+      calls.push(['readPixels', t ? t.id : null, x, y, width, height, !!opts]);
       const painted = world.painted || [0, 0, 0, 255];      // what paint(id) last wrote into uColor
       return Promise.resolve(Uint8Array.from(painted));
     },
