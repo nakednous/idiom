@@ -14,6 +14,7 @@ const ARITY = {
   renderTarget: 2, SCREEN: null,
   program: 2, fullscreen: 1, filter: 4, image: 3, pipe: 4, releasePipe: 2,
   state: 2,
+  CUBE_FACES: null, texture: 3, upload: 3, cubemap: 3,
   TRANSFORMS: null, declaredTransforms: 1,
   buffer: 3, updateBuffer: 4, writeBuffer: 3, install: 3, draw: 4,
   RED: null, GREEN: null, BLUE: null, ALPHA: null, RGB: null,
@@ -41,9 +42,9 @@ test('the interface list is complete, unique and the fake implements it', () => 
   assert.equal(new Set(MEMBERS).size, MEMBERS.length, 'no member is named twice');
   for (const name of ['createTarget', 'destroyTarget', 'bindTarget', 'clear', 'createProgram', 'imageProgram',
     'uniformsOf', 'samplersOf', 'setUniforms', 'setCamera', 'draw', 'drawInstanced', 'createBuffer',
-    'updateBuffer', 'writeBuffer', 'readPixels', 'createTexture', 'uploadTexture', 'destroyTexture',
-    'textureSize', 'setViewport', 'setState', 'dispose']) assert.ok(MEMBERS.includes(name), name);
-  assert.equal(MEMBERS.length, 23);
+    'updateBuffer', 'writeBuffer', 'readPixels', 'createTexture', 'uploadTexture', 'createCubeTexture',
+    'destroyTexture', 'textureSize', 'setViewport', 'setState', 'dispose']) assert.ok(MEMBERS.includes(name), name);
+  assert.equal(MEMBERS.length, 24);
   assert.deepEqual(CONVENTIONS, ['ndcZMin', 'uvOrientation', 'framebufferY', 'format']);
   assert.deepEqual(checkBackend(createFake().backend), []);
 });

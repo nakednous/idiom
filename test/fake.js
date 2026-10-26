@@ -153,10 +153,11 @@ export function createFake(opts) {
       return b;
     },
     readPixels(ctx, t, x, y, width, height) { calls.push(['readPixels', t.id, x, y, width, height]); return new Uint8Array(4); },
-    createTexture(ctx, descriptor) { const tex = texture(null, 0, 0); calls.push(['createTexture', descriptor, tex.id]); return tex; },
+    createTexture(ctx, descriptor) { const tex = texture(null, (descriptor && descriptor.width) || 0, (descriptor && descriptor.height) || 0); calls.push(['createTexture', descriptor, tex.id]); return tex; },
     uploadTexture(ctx, tex, source) { calls.push(['uploadTexture', tex.id]); },
+    createCubeTexture(ctx, faces, opts) { const tex = texture(null, 0, 0); calls.push(['createCubeTexture', faces.length, tex.id]); return tex; },
     destroyTexture(ctx, tex) { calls.push(['destroyTexture', tex.id]); },
-    textureSize(ctx, tex) { calls.push(['textureSize', tex.id]); return tex.width ? [tex.width, tex.height] : null; },
+    textureSize(ctx, tex) { return (ctx.sizes && ctx.sizes.get(tex)) || (tex.width ? [tex.width, tex.height] : null); },   // a query: it records nothing
     setViewport(ctx, rect) {
       calls.push(['setViewport', rect]);
       const prior = world.viewport;

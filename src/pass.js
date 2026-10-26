@@ -166,7 +166,7 @@ export function filter(ctx, prog, uniforms, input) {
     if (declared.has('uResolution')) { _res[0] = vp[2]; _res[1] = vp[3]; values.uResolution = _res; filled = true; }
     if (declared.has('uTexelSize')) {
       const src = tex || (uniforms && uniforms.uSource);
-      const size = (src && ctx.sizes.get(src)) || null;
+      const size = src ? backend.textureSize(ctx, src) : null;
       _texel[0] = 1 / (size ? size[0] : vp[2]); _texel[1] = 1 / (size ? size[1] : vp[3]);
       values.uTexelSize = _texel; filled = true;
     }
@@ -299,7 +299,7 @@ export function pipe(ctx, source, passes, opts) {
     if (display && srcTex) { if (o.clearDisplay ?? true) clearDisplayFn(ctx); image(ctx, srcTex); }
     return null;
   }
-  const size = (source && source.width) ? [source.width, source.height] : (ctx.sizes.get(srcTex) || [vp[2], vp[3]]);
+  const size = (source && source.width) ? [source.width, source.height] : (backend.textureSize(ctx, srcTex) || [vp[2], vp[3]]);
   const hasPing = Object.prototype.hasOwnProperty.call(o, 'ping');
   const hasPong = Object.prototype.hasOwnProperty.call(o, 'pong');
   const store = ctx.pipes[key] || (ctx.pipes[key] = {});

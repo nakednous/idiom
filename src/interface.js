@@ -17,7 +17,7 @@
  * draws     setCamera · draw · drawInstanced
  * buffers   createBuffer · updateBuffer · writeBuffer
  * picking   readPixels
- * textures  createTexture · uploadTexture · destroyTexture · textureSize
+ * textures  createTexture · uploadTexture · createCubeTexture · destroyTexture · textureSize
  * state     setViewport · setState
  * context   dispose
  * ```
@@ -58,6 +58,14 @@
  * take no value (or `undefined`) to ask only. A composite restores what it
  * found by handing that token back, so no member exists only to read state.
  *
+ * Textures. `createTexture(ctx, source, opts)` takes a source or the backend's
+ * own descriptor and `uploadTexture(ctx, tex, source)` refreshes one;
+ * `createCubeTexture(ctx, faces, opts)` takes six sources in the cube's order
+ * (+X −X +Y −Y +Z −Z) — a face target on GL, a layer on WebGPU, which is why it
+ * is its own member rather than a flag on the other (§7 #123) — and
+ * `textureSize(ctx, tex)` answers the record's size, which a pass reads for
+ * `uTexelSize`.
+ *
  * Conventions are fields on the backend object, written once per API:
  *
  * ```
@@ -80,7 +88,7 @@ export const MEMBERS = [
   'setCamera', 'draw', 'drawInstanced',
   'createBuffer', 'updateBuffer', 'writeBuffer',
   'readPixels',
-  'createTexture', 'uploadTexture', 'destroyTexture', 'textureSize',
+  'createTexture', 'uploadTexture', 'createCubeTexture', 'destroyTexture', 'textureSize',
   'setViewport', 'setState',
   'dispose',
 ];

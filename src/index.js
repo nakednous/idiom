@@ -15,6 +15,7 @@
  * bind(ctx, prog)                             // the bridge's own verb
  * draw(ctx, solid, M)                         // the declared transforms, then the draw
  * const target = renderTarget(ctx, opts)
+ * const sky = cubemap(ctx, sixFaces)          // the textures' policy
  * filter(ctx, prog, uniforms, input)
  * const pair = state(ctx, opts)
  * disposeContext(ctx)                         // the bridge's dispose calls this first
@@ -38,3 +39,4 @@ export {
   TRANSFORMS, declaredTransforms, buffer, updateBuffer, writeBuffer, install, draw,
 } from './draw.js';
 export { state } from './state.js';
+export { CUBE_FACES, texture, upload, cubemap } from './texture.js';
