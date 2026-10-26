@@ -140,6 +140,7 @@ export function createFake(opts) {
     },
     draw(ctx, p, geometry) { calls.push(['draw', p.id, geometry.id]); },
     drawInstanced(ctx, p, geometry, count) { calls.push(['drawInstanced', p.id, geometry.id, count]); },
+    drawGizmo(ctx, kind, geometry, spec) { calls.push(['drawGizmo', kind, geometry.id, spec]); return geometry; },
     createBuffer(ctx, arrays, opts) {
       const b = { id: 'buffer' + (++seq), arrays };
       buffers.push(b);

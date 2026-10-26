@@ -42,3 +42,4 @@ export {
 export { state } from './state.js';
 export { CUBE_FACES, texture, upload, cubemap } from './texture.js';
 export { readPixel, pick } from './pick.js';
+export { gizmo, fill, expand, drawLines, drawPane, beginHUD, endHUD, inHUD } from './pipe.js';

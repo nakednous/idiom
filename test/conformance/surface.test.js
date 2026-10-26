@@ -16,6 +16,7 @@ const ARITY = {
   state: 2,
   CUBE_FACES: null, texture: 3, upload: 3, cubemap: 3,
   readPixel: 5, pick: 5,
+  gizmo: 3, fill: 3, expand: 2, drawLines: 3, drawPane: 3, beginHUD: 2, endHUD: 1, inHUD: 3,
   TRANSFORMS: null, declaredTransforms: 1,
   buffer: 3, updateBuffer: 4, writeBuffer: 3, install: 3, draw: 4,
   RED: null, GREEN: null, BLUE: null, ALPHA: null, RGB: null,
@@ -44,8 +45,8 @@ test('the interface list is complete, unique and the fake implements it', () => 
   for (const name of ['createTarget', 'destroyTarget', 'bindTarget', 'clear', 'createProgram', 'imageProgram',
     'uniformsOf', 'samplersOf', 'setUniforms', 'setCamera', 'draw', 'drawInstanced', 'createBuffer',
     'updateBuffer', 'writeBuffer', 'readPixels', 'createTexture', 'uploadTexture', 'createCubeTexture',
-    'destroyTexture', 'textureSize', 'setViewport', 'setState', 'dispose']) assert.ok(MEMBERS.includes(name), name);
-  assert.equal(MEMBERS.length, 24);
+    'destroyTexture', 'textureSize', 'setViewport', 'setState', 'drawGizmo', 'dispose']) assert.ok(MEMBERS.includes(name), name);
+  assert.equal(MEMBERS.length, 25);
   assert.deepEqual(CONVENTIONS, ['ndcZMin', 'uvOrientation', 'framebufferY', 'format']);
   assert.deepEqual(checkBackend(createFake().backend), []);
 });

@@ -2,7 +2,8 @@
 
 The composite layer `webgl.tree` and `webgpu.tree` share: render targets, passes — `fullscreen`,
 `filter`, `image`, `pipe` — `state`'s owned pair, the textures' policy — `texture`, `upload`,
-`cubemap` — the picking protocol — `readPixel`, `pick` — and the draw policy — `buffer`, `updateBuffer`, `writeBuffer`, the six declared transforms
+`cubemap` — the picking protocol — `readPixel`, `pick` — the line pipe's cache, width policy and HUD,
+and the draw policy — `buffer`, `updateBuffer`, `writeBuffer`, the six declared transforms
 and `draw` — over a per-API backend interface.
 
 **Internal, experimental.** Not a public API: no application imports it directly, there is no API
@@ -22,10 +23,12 @@ image(ctx, tex, opts) · pipe(ctx, source, passes, opts) · releasePipe(ctx, key
 state(ctx, opts)
 texture(ctx, source, opts) · upload(ctx, tex, source) · cubemap(ctx, faces, opts) · CUBE_FACES
 readPixel(ctx, target, x, y) · pick(ctx, x, y, drawFn, opts)
+gizmo(ctx, name, opts) · fill(ctx, g, gen) · drawLines(ctx, g, opts) · drawPane(ctx, g, opts)
+beginHUD(ctx, { vp }) · endHUD(ctx) · inHUD(ctx, opts, fn)
 buffer(ctx, arrays, opts) · updateBuffer(ctx, geo, arrays, opts) · writeBuffer(ctx, geo, arrays)
 install(ctx, prog, M) · draw(ctx, geo, M, opts) · TRANSFORMS · declaredTransforms(names)
 ```
 
 Status: `0.0.x`, experimental — targets, passes, `pipe`, `state`, the textures' policy and the draw
-policy and the picking protocol, proven against the fake and by both bridges; the space mappings,
-gizmos/HUD and the camera install are later stages. Gates: `npm test`, `npm run build`.
+policy, the picking protocol and the line pipe, proven against the fake and by both bridges; the ten
+gizmo verbs themselves, the space mappings and the camera install are later stages. Gates: `npm test`, `npm run build`.

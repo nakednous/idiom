@@ -14,7 +14,7 @@
  * ```
  * targets   createTarget · destroyTarget · bindTarget · clear
  * programs  createProgram · imageProgram · uniformsOf · samplersOf · setUniforms
- * draws     setCamera · draw · drawInstanced
+ * draws     setCamera · draw · drawInstanced · drawGizmo
  * buffers   createBuffer · updateBuffer · writeBuffer
  * picking   readPixels
  * textures  createTexture · uploadTexture · createCubeTexture · destroyTexture · textureSize
@@ -58,6 +58,15 @@
  * take no value (or `undefined`) to ask only. A composite restores what it
  * found by handing that token back, so no member exists only to read state.
  *
+ * Gizmos. The line pipe's programs are the backend's (`lineProgram`,
+ * `wideLineProgram`, `paneProgram`), because a shader source is per API, and so
+ * is the draw: `drawGizmo(ctx, kind, geometry, spec)` takes `kind`
+ * (`'line'`, `'wide'`, `'pane'`) and a semantic spec — `M`, `color`, `useColor`,
+ * `width` in device pixels, `vp`, `texture`, `depth`, `count` — and translates it
+ * into its own uniforms, topology and state. The layer never names a uniform of
+ * a gizmo program; the six declared transforms are the draw policy's, and a
+ * gizmo's are not those (§7 #126).
+ *
  * Picking. `readPixels(ctx, target, x, y, width, height, opts)` answers a
  * `Promise` of RGBA bytes for a block of a target's own pixels, row 0 in the
  * backend's `framebufferY` orientation; `opts` is the backend's own, the
@@ -91,7 +100,7 @@
 export const MEMBERS = [
   'createTarget', 'destroyTarget', 'bindTarget', 'clear',
   'createProgram', 'imageProgram', 'uniformsOf', 'samplersOf', 'setUniforms',
-  'setCamera', 'draw', 'drawInstanced',
+  'setCamera', 'draw', 'drawInstanced', 'drawGizmo',
   'createBuffer', 'updateBuffer', 'writeBuffer',
   'readPixels',
   'createTexture', 'uploadTexture', 'createCubeTexture', 'destroyTexture', 'textureSize',

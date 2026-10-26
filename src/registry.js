@@ -56,6 +56,8 @@ export function createContext(backend) {
     pipes: Object.create(null),     // key → { ping, pong }, pipe's cached pairs
     sizes: new WeakMap(),           // texture → [width, height], for uTexelSize
     quad: null,                     // the fullscreen geometry, made on first use
+    gizmos: Object.create(null),    // name → { arrays, buffer, capacity, wide }, one a name
+    hud: null,                      // the saved camera and depth while HUD mode is on
     uniforms: new WeakMap(),        // program → Set of the uniform names it declares
     samplers: new WeakMap(),        // program → the sampler names it declares
     warned: new WeakSet(),          // programs whose unset sampler was logged
