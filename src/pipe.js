@@ -170,9 +170,13 @@ export function expand(ctx, g) {
  * device pixel of width, the expanded quads above it. The backend picks the
  * program and translates the spec; the depth test is off for `depth: false` and
  * restored after.
+ * @details The quads are measured in the viewport the width's device pixels are
+ * in, so a caller states `vp` only where it draws into a sub-viewport; the
+ * backend's own viewport is the default, and the HUD's logical one is not the
+ * same space.
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry, filled.
- * @param {{ M?:ArrayLike<number>, color?:number[], width?:number, depth?:boolean, dpr?:number }} [opts]
+ * @param {{ M?:ArrayLike<number>, color?:number[], width?:number, depth?:boolean, dpr?:number, vp?:number[] }} [opts]
  * @returns {object|null} The backend's answer, or null where nothing was drawn.
  * @example
  * fill(ctx, g, (a) => tree.axesLines(a, { size: 100 }))
@@ -198,6 +202,9 @@ export function drawLines(ctx, g, opts) {
 
 /**
  * Draw a filled cache as triangles through the backend's pane program.
+ * @details The draw counts the cache's own vertices — a geometry is sized to the
+ * cache's capacity, and a pane writes six of it — so a backend that takes the
+ * geometry's element count draws the shape, not the room it has.
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry with texcoords, filled.
  * @param {{ M?:ArrayLike<number>, color?:number[], texture?:object, depth?:boolean }} [opts]
@@ -210,6 +217,7 @@ export function drawPane(ctx, g, opts) {
   const o = opts || {};
   return ctx.backend.drawGizmo(ctx, 'pane', g.buffer, {
     M: o.M || IDENTITY, color: o.color || WHITE, texture: o.texture || null, depth: o.depth !== false,
+    count: g.arrays.count,
   });
 }
 

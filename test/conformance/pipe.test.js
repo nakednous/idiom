@@ -103,6 +103,22 @@ test('drawLines: the width in logical pixels crosses to device pixels, and picks
   assert.equal(fake.calls.filter((c) => c[0] === 'drawGizmo').length, 0);
 });
 
+test('drawPane: the draw counts the cache\'s vertices, not the room its geometry has', () => {
+  const fake = createFake();
+  const ctx = createContext(fake.backend);
+  const g = gizmo(ctx, 'pane', { texcoord: true });
+  fill(ctx, g, (a) => {                                // six vertices of a 64-vertex cache: a quad
+    a.count = 6;
+    return 6;
+  });
+  assert.equal(g.capacity > 6, true, 'the geometry is sized to the cache, which is more than the pane writes');
+  fake.calls.length = 0;
+  drawPane(ctx, g, { color: [1, 1, 1, 1] });
+  const call = fake.calls.find((c) => c[0] === 'drawGizmo');
+  assert.equal(call[1], 'pane');
+  assert.equal(call[3].count, 6, 'the pane\'s own six vertices');
+});
+
 test('the HUD: the viewport is required, the ortho goes in, the camera and depth come back', () => {
   const fake = createFake();
   const ctx = createContext(fake.backend);
