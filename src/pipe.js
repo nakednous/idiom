@@ -145,8 +145,9 @@ export function expand(ctx, g) {
       w.A[o] = p[a]; w.A[o + 1] = p[a + 1]; w.A[o + 2] = p[a + 2];
       w.B[o] = p[b]; w.B[o + 1] = p[b + 1]; w.B[o + 2] = p[b + 2];
       if (c) {
-        const q = 16 * i + 4 * v;
-        const src = v < 2 ? a : b;
+        // a colour is four floats a vertex, where a position is three: the vertex's
+        // index, not the position's offset, is what the colour array is read at
+        const q = 16 * i + 4 * v, src = 8 * i + (v < 2 ? 0 : 4);
         w.color[q] = c[src]; w.color[q + 1] = c[src + 1]; w.color[q + 2] = c[src + 2]; w.color[q + 3] = c[src + 3];
       }
     }

@@ -60,10 +60,11 @@ test('expand: four vertices and six indices a segment, the endpoints and their c
   const fake = createFake();
   const ctx = createContext(fake.backend);
   const g = gizmo(ctx, 'hermite', { color: true });
+  const PALETTE = [[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1], [1, 1, 0, 1]];   // a colour a vertex
   fill(ctx, g, (a) => {
     for (let i = 0; i < 4; i++) {                    // two segments
       a.position.data[3 * i] = i; a.position.data[3 * i + 1] = 0; a.position.data[3 * i + 2] = 0;
-      a.color.data[4 * i] = 1; a.color.data[4 * i + 1] = 0; a.color.data[4 * i + 2] = 0; a.color.data[4 * i + 3] = 1;
+      for (let k = 0; k < 4; k++) a.color.data[4 * i + k] = PALETTE[i][k];
     }
     a.count = 4;
     return 4;
@@ -76,6 +77,13 @@ test('expand: four vertices and six indices a segment, the endpoints and their c
   assert.deepEqual(Array.from(g.wide.T.slice(0, 4)), [0, 0, 1, 1], 'which end each vertex sits at');
   assert.deepEqual(Array.from(g.wide.S.slice(0, 4)), [-1, 1, -1, 1], 'and its side');
   assert.deepEqual(Array.from(g.wide.indices.slice(0, 6)), [0, 1, 2, 1, 3, 2], 'two triangles a segment');
+  // every vertex of a segment's quad carries its own endpoint's colour: the first
+  // two vertices the segment's start, the last two its end — a colour is four floats
+  // a vertex where a position is three, so a quad's block is read by the vertex
+  assert.deepEqual(Array.from(g.wide.color.slice(0, 16)),
+    [...PALETTE[0], ...PALETTE[0], ...PALETTE[1], ...PALETTE[1]], 'the first segment, red to green');
+  assert.deepEqual(Array.from(g.wide.color.slice(16, 32)),
+    [...PALETTE[2], ...PALETTE[2], ...PALETTE[3], ...PALETTE[3]], 'the second, blue to yellow');
 });
 
 test('drawLines: the width in logical pixels crosses to device pixels, and picks the program', () => {
