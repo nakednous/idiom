@@ -111,6 +111,41 @@ test('drawLines: the width in logical pixels crosses to device pixels, and picks
   assert.equal(fake.calls.filter((c) => c[0] === 'drawGizmo').length, 0);
 });
 
+test('drawLines: a labelled cache hands each item out under the draw\'s model matrix', () => {
+  const fake = createFake();
+  const ctx = createContext(fake.backend);
+  const g = gizmo(ctx, 'rig', { color: true, labels: true });
+  fill(ctx, g, (a) => {
+    a.position.data[0] = 1; a.count = 2;
+    a.labels.push({ x: 1, y: 2, z: 3, text: 'L0' }, { x: 0, y: 0, z: 0, text: 'L1' });
+    return 2;
+  });
+  const sink = [];
+  // a translation of (10, 20, 30): an anchor is world space, not the generator's frame
+  const M = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 10, 20, 30, 1];
+
+  fake.calls.length = 0;
+  drawLines(ctx, g, { M, width: 1, dpr: 1, identify: (id, text, x, y, z) => sink.push({ id, text, x, y, z }) });
+  const call = fake.calls.find((c) => c[0] === 'drawGizmo');
+  assert.equal(call[3].labels.length, 2, 'the spec carries the items the draw places');
+  assert.equal(typeof call[3].identify, 'function', 'and the sink, for the backend to forward them to');
+  assert.deepEqual(call[3].labels.map((l) => l.id), ['rig:0', 'rig:1'], 'an id is the cache\'s name and the label\'s index');
+  assert.deepEqual(call[3].labels.map((l) => l.text), ['L0', 'L1']);
+  assert.deepEqual(call[3].labels.map((l) => [l.x, l.y, l.z]), [[11, 22, 33], [10, 20, 30]], 'the anchor under M');
+
+  // a second draw states the same ids over the same items — one label a frame, reused by id
+  fake.calls.length = 0;
+  drawLines(ctx, g, { identify: () => {} });
+  assert.deepEqual(fake.calls.find((c) => c[0] === 'drawGizmo')[3].labels.map((l) => l.id), ['rig:0', 'rig:1']);
+
+  // no sink, no items: a draw that is not asked for labels carries none
+  fake.calls.length = 0;
+  drawLines(ctx, g, {});
+  const plain = fake.calls.find((c) => c[0] === 'drawGizmo');
+  assert.equal(plain[3].labels, null);
+  assert.equal(plain[3].identify, null);
+});
+
 test('drawPane: the draw counts the cache\'s vertices, not the room its geometry has', () => {
   const fake = createFake();
   const ctx = createContext(fake.backend);

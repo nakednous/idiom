@@ -3,8 +3,8 @@
 The composite layer `webgl.tree` and `webgpu.tree` share: render targets, passes — `fullscreen`,
 `filter`, `image`, `pipe` — `state`'s owned pair, the textures' policy — `texture`, `upload`,
 `cubemap` — the picking protocol — `readPixel`, `pick` — the line pipe's cache, width policy and HUD,
-and the draw policy — `buffer`, `updateBuffer`, `writeBuffer`, the six declared transforms
-and `draw` — over a per-API backend interface.
+the labels a draw places forwarded to a sink, and the draw policy — `buffer`, `updateBuffer`,
+`writeBuffer`, the six declared transforms and `draw` — over a per-API backend interface.
 
 **Internal, experimental.** Not a public API: no application imports it directly, there is no API
 site, and the bridges re-export what they document. Its only dependency is `@nakednous/tree`; a

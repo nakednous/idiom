@@ -13,6 +13,7 @@
  * fill(ctx, g, (a) => tree.axesLines(a, { size: 100 }))   // run a generator, grow, re-upload
  * beginHUD(ctx, { vp }) · endHUD(ctx)               // an ortho over the viewport, logical pixels
  * drawLines(ctx, g, { M, color, width, depth, dpr })      // the backend's programs and draws
+ * drawLines(ctx, g, { M, identify })                // and the labels it places, handed to a sink
  * ```
  *
  * **The width.** `width` counts logical pixels — a hero's number, independent of
@@ -28,6 +29,16 @@
  * `endHUD` restores both. A gizmo that takes a screen position runs inside the
  * pair; `inHUD` wraps one call so a figure need not nest them.
  *
+ * **Labels.** A generator may write anchors into `arrays.labels` — `{ x, y, z,
+ * text }` in the frame the draw is in — and a draw that is handed `opts.identify`
+ * hands each of them out as `identify(id, text, x, y, z)`: the anchor already in
+ * world space, under the draw's own model matrix, and the id `<cache name>:<index>`,
+ * stated once here so both bridges' labels answer the same names a frame. The
+ * layer never learns what a label is: it forwards, and the bridge wires the sink
+ * to its DOM. The items are the cache's, rewritten a draw, and they travel to the
+ * backend on the draw's spec (`spec.labels`, `spec.identify`), so a label is
+ * emitted by the draw that places it (§7 #130).
+ *
  * **What the backend draws.** The programs are the backend's (`lineProgram`,
  * `wideLineProgram`, `paneProgram`) because their shader sources are per API, and
  * so is the draw: `drawGizmo(ctx, kind, geometry, spec)` translates the layer's
@@ -38,20 +49,23 @@
 
 'use strict';
 
-import { WEBGL, capacityOf, createArrays, growArrays, mat4Ortho } from '@nakednous/tree';
+import { WEBGL, capacityOf, createArrays, growArrays, mat4MulPoint, mat4Ortho } from '@nakednous/tree';
 import { buffer, writeBuffer } from './draw.js';
 
 const IDENTITY = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
 const WHITE = [1, 1, 1, 1];
 const _P = new Float32Array(16);
 const _vp = [0, 0, 0, 0];
+const _anchor = [0, 0, 0];
 
 /**
  * A gizmo's cache for one context: its arrays, its geometry, the wide cache.
+ * @details The cache's `name` is also its labels' namespace — an id is
+ * `<name>:<index>` — so a subject that labels its items is a cache of its own.
  * @param {object} ctx  The context record.
  * @param {string} name  The gizmo's name — one cache a name a context.
  * @param {{ color?:boolean, texcoord?:boolean, labels?:boolean }} [opts]  The attributes its generator writes.
- * @returns {object} The cache entry: `{ arrays, buffer, capacity, wide }`.
+ * @returns {object} The cache entry: `{ name, arrays, buffer, capacity, wide }`.
  * @example
  * const g = gizmo(ctx, 'grid', { color: true })
  */
@@ -59,7 +73,7 @@ export function gizmo(ctx, name, opts) {
   if (!ctx.gizmos) ctx.gizmos = Object.create(null);
   let g = ctx.gizmos[name];
   if (!g) {
-    g = { arrays: createArrays(64, opts), buffer: null, capacity: 0, wide: null };
+    g = { name, arrays: createArrays(64, opts), buffer: null, capacity: 0, wide: null, ids: null, placed: null };
     ctx.gizmos[name] = g;
   }
   return g;
@@ -167,6 +181,38 @@ export function expand(ctx, g) {
 }
 
 /**
+ * Resolve a filled cache's labelled items for one draw: each label's id, the
+ * cache's name and the label's index, and its anchor taken to world space under
+ * `M`. The items belong to the cache and are rewritten a draw, so a sink copies
+ * what it keeps; nothing is allocated once the cache is warm.
+ * @param {object} g  A cache entry whose generator writes labels.
+ * @param {ArrayLike<number|null} [M]  The draw's model matrix, or null for the identity.
+ * @returns {object[]|null} The items, or null where the cache carries no labels.
+ * @ignore
+ */
+function _placeLabels(g, M) {
+  const src = g.arrays && g.arrays.labels;
+  if (!src || !src.length) return null;
+  const out = g.placed || (g.placed = []);
+  const ids = g.ids || (g.ids = []);
+  out.length = src.length;
+  for (let i = 0; i < src.length; i++) {
+    const l = src[i];
+    let item = out[i];
+    if (!item) item = out[i] = { id: '', text: '', x: 0, y: 0, z: 0 };
+    if (M) {
+      mat4MulPoint(_anchor, M, l.x, l.y, l.z);
+      item.x = _anchor[0]; item.y = _anchor[1]; item.z = _anchor[2];
+    } else {
+      item.x = l.x; item.y = l.y; item.z = l.z;
+    }
+    item.text = l.text;
+    item.id = ids[i] || (ids[i] = g.name + ':' + i);
+  }
+  return out;
+}
+
+/**
  * Draw a filled cache as lines under `opts.M` — the raw list at or below one
  * device pixel of width, the expanded quads above it. The backend picks the
  * program and translates the spec; the depth test is off for `depth: false` and
@@ -175,17 +221,24 @@ export function expand(ctx, g) {
  * in, so a caller states `vp` only where it draws into a sub-viewport; the
  * backend's own viewport is the default, and the HUD's logical one is not the
  * same space.
+ *
+ * `opts.identify` is a sink, and the draw places the labels it filled: each is
+ * handed to it as `identify(id, text, x, y, z)`, the anchor in world space and
+ * the id `<cache name>:<index>` (§7 #130).
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry, filled.
- * @param {{ M?:ArrayLike<number>, color?:number[], width?:number, depth?:boolean, dpr?:number, vp?:number[] }} [opts]
+ * @param {{ M?:ArrayLike<number>, color?:number[], width?:number, depth?:boolean, dpr?:number,
+ *           vp?:number[], identify?:function }} [opts]
  * @returns {object|null} The backend's answer, or null where nothing was drawn.
  * @example
  * fill(ctx, g, (a) => tree.axesLines(a, { size: 100 }))
- * drawLines(ctx, g, { width: 2, dpr: window.devicePixelRatio })
+ * drawLines(ctx, g, { width: 2, dpr: 2, identify: (id, text, x, y, z) => console.log(id, text) })
  */
 export function drawLines(ctx, g, opts) {
   if (!ctx || !ctx.backend || !g || !g.arrays || !g.arrays.count) return null;
   const o = opts || {};
+  const identify = typeof o.identify === 'function' ? o.identify : null;
+  const labels = identify ? _placeLabels(g, o.M) : null;
   const px = (typeof o.width === 'number' ? o.width : 1) * (typeof o.dpr === 'number' ? o.dpr : 1);
   const wide = px > 1;
   if (wide) {
@@ -193,11 +246,13 @@ export function drawLines(ctx, g, opts) {
     return ctx.backend.drawGizmo(ctx, 'wide', w.buffer, {
       M: o.M || IDENTITY, color: o.color || WHITE, useColor: !!g.arrays.color,
       width: px, vp: o.vp || null, depth: o.depth !== false, count: 6 * w.segments,
+      labels, identify,
     });
   }
   return ctx.backend.drawGizmo(ctx, 'line', g.buffer, {
     M: o.M || IDENTITY, color: o.color || WHITE, useColor: !!g.arrays.color,
     depth: o.depth !== false, count: g.arrays.count,
+    labels, identify,
   });
 }
 

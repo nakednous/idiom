@@ -67,6 +67,13 @@
  * a gizmo program; the six declared transforms are the draw policy's, and a
  * gizmo's are not those (§7 #126).
  *
+ * A spec may also carry `labels` and `identify`: the labelled items this draw
+ * places (`{ id, text, x, y, z }`, the anchor in world space, the ids the
+ * layer's) and the sink each is handed to. A backend forwards them —
+ * `identify(item.id, item.text, item.x, item.y, item.z)` — and does nothing else
+ * with them: what a label is belongs to the bridge's DOM, not to the API (§7
+ * #130).
+ *
  * Picking. `readPixels(ctx, target, x, y, width, height, opts)` answers a
  * `Promise` of RGBA bytes for a block of a target's own pixels, row 0 in the
  * backend's `framebufferY` orientation; `opts` is the backend's own, the
