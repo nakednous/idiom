@@ -16,7 +16,7 @@ const ARITY = {
   state: 2,
   CUBE_FACES: null, texture: 3, upload: 3, cubemap: 3,
   readPixel: 5, pick: 5,
-  gizmo: 3, fill: 3, expand: 2, drawLines: 3, drawPane: 3, beginHUD: 2, endHUD: 1, inHUD: 3,
+  gizmo: 3, fill: 4, expand: 2, drawLines: 3, drawPane: 3, beginHUD: 2, endHUD: 1, inHUD: 3,
   TRANSFORMS: null, declaredTransforms: 1,
   buffer: 3, updateBuffer: 4, writeBuffer: 3, install: 3, draw: 4,
   RED: null, GREEN: null, BLUE: null, ALPHA: null, RGB: null,

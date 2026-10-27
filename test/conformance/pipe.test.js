@@ -41,6 +41,21 @@ test('gizmo: one cache a name a context, and fill reuses its geometry in place',
   assert.equal(g.capacity, 200);
 });
 
+test('fill: the creation options reach the backend, and a rebuild keeps them', () => {
+  const fake = createFake();
+  const ctx = createContext(fake.backend);
+  const g = gizmo(ctx, 'rig', { color: true });
+  const creation = { program: { id: 'line' }, interleave: false, stream: true };
+  fill(ctx, g, lines(4), creation);
+  const first = fake.calls.find((c) => c[0] === 'createBuffer');
+  assert.ok(first, 'a geometry is made');
+  fake.calls.length = 0;
+  fill(ctx, g, lines(200));                                   // past the cache's 64: a rebuild, no opts passed
+  const rebuild = fake.calls.find((c) => c[0] === 'createBuffer');
+  assert.ok(rebuild, 'the rebuild creates one');
+  assert.deepEqual(rebuild[2], creation, 'with the options the cache remembers');
+});
+
 test('expand: four vertices and six indices a segment, the endpoints and their colours', () => {
   const fake = createFake();
   const ctx = createContext(fake.backend);

@@ -77,18 +77,29 @@ function _arraysOf(g) {
  * Run a generator into a cache, growing it when the count outruns the capacity,
  * and (re)upload the geometry — a rebuild when the capacity changed, an in-place
  * write otherwise, so a gizmo allocates nothing once warm.
+ *
+ * `opts` are the backend's creation options, and they are what makes a cache
+ * usable by a backend whose pipelines bake their vertex layout: `{ program }`
+ * states the program the geometry must match, `{ interleave: false }` one buffer
+ * an attribute, `{ stream: true }` a geometry written a draw (a WebGPU stream's
+ * slot, whose write and draw have to agree — the backend's business, §7 #127).
+ * They are remembered on the cache, so a rebuild after growth keeps them.
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry from `gizmo`.
  * @param {function(object):number} gen  `gen(arrays)` writes and returns the vertex count.
+ * @param {object} [opts]  The backend's creation options; the cache's own where omitted.
  * @returns {number} The vertices written.
  * @example
  * fill(ctx, g, (a) => tree.gridLines(a, { size: 100 }))
+ * fill(ctx, g, (a) => tree.axesLines(a, { size: 100 }), { program: lineProg, stream: true })
  */
-export function fill(ctx, g, gen) {
+export function fill(ctx, g, gen, opts) {
+  if (opts) g.opts = opts;
+  const creation = opts || g.opts;
   let n = gen(g.arrays);
   if (n > capacityOf(g.arrays)) { growArrays(g.arrays, n); gen(g.arrays); }
   if (!g.buffer || g.capacity !== capacityOf(g.arrays)) {
-    g.buffer = buffer(ctx, _arraysOf(g));
+    g.buffer = buffer(ctx, _arraysOf(g), creation);
     g.capacity = capacityOf(g.arrays);
   } else if (g.arrays.count > 0) {
     writeBuffer(ctx, g.buffer, _arraysOf(g));
@@ -148,7 +159,7 @@ export function expand(ctx, g) {
   if (w.color) specs.aColor = { numComponents: 4, data: w.color };
   const moves = { aA: specs.aA, aB: specs.aB };
   if (w.color) moves.aColor = specs.aColor;
-  if (!w.buffer) w.buffer = buffer(ctx, specs);
+  if (!w.buffer) w.buffer = buffer(ctx, specs, g.opts && g.opts.wide);
   else if (segs > 0) writeBuffer(ctx, w.buffer, moves);
   w.segments = segs;
   return { buffer: w.buffer, segments: segs };
