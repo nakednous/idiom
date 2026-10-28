@@ -6,7 +6,7 @@
  *
  * A gizmo is a tree generator's output drawn immediately: the generators write
  * into arrays the layer keeps per name per context, the geometry is re-uploaded
- * in place each frame, and the draw is the backend's (§7 #113's slot rule).
+ * in place each frame, and the draw is the backend's, a slot a draw a frame.
  *
  * ```
  * const g = gizmo(ctx, 'axes', { color: true })     // one cache a context, per name
@@ -30,21 +30,18 @@
  * pair; `inHUD` wraps one call so a figure need not nest them.
  *
  * **Labels.** A generator may write anchors into `arrays.labels` — `{ x, y, z,
- * text }` in the frame the draw is in — and a draw that is handed `opts.identify`
- * hands each of them out as `identify(id, text, x, y, z)`: the anchor already in
- * world space, under the draw's own model matrix, and the id `<cache name>:<index>`,
- * stated once here so both bridges' labels answer the same names a frame. The
- * layer never learns what a label is: it forwards, and the bridge wires the sink
- * to its DOM. The items are the cache's, rewritten a draw, and they travel to the
- * backend on the draw's spec (`spec.labels`, `spec.identify`), so a label is
- * emitted by the draw that places it (§7 #130).
+ * text }` in the draw's frame — and a draw handed `opts.identify` hands each out
+ * as `identify(id, text, x, y, z)`: the anchor in world space under the draw's
+ * matrix, the id `<cache name>:<index>`. The layer forwards and the bridge wires
+ * the sink; the items ride the draw's spec, so a label is emitted by the draw
+ * that places it.
  *
  * **What the backend draws.** The programs are the backend's (`lineProgram`,
  * `wideLineProgram`, `paneProgram`) because their shader sources are per API, and
  * so is the draw: `drawGizmo(ctx, kind, geometry, spec)` translates the layer's
  * semantic spec — model matrix, colour, whether the arrays carry colour, the
  * width in device pixels, the viewport, a texture, the depth, a partial count —
- * into its own uniforms, its own topology and its own state (§7 #126).
+ * into its own uniforms, its own topology and its own state.
  */
 
 'use strict';
@@ -96,7 +93,7 @@ function _arraysOf(g) {
  * usable by a backend whose pipelines bake their vertex layout: `{ program }`
  * states the program the geometry must match, `{ interleave: false }` one buffer
  * an attribute, `{ stream: true }` a geometry written a draw (a WebGPU stream's
- * slot, whose write and draw have to agree — the backend's business, §7 #127).
+ * slot, whose write and draw have to agree — the backend's business).
  * They are remembered on the cache, so a rebuild after growth keeps them.
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry from `gizmo`.
@@ -181,13 +178,12 @@ export function expand(ctx, g) {
 }
 
 /**
- * Resolve a filled cache's labelled items for one draw: each label's id, the
- * cache's name and the label's index, and its anchor taken to world space under
- * `M`. The items belong to the cache and are rewritten a draw, so a sink copies
- * what it keeps; nothing is allocated once the cache is warm.
+ * Resolve a cache's labelled items for one draw: the id (`<name>:<index>`) and
+ * the anchor taken to world space under `M`. The items are the cache's and are
+ * rewritten a draw, so a sink copies what it keeps.
  * @param {object} g  A cache entry whose generator writes labels.
- * @param {ArrayLike<number|null} [M]  The draw's model matrix, or null for the identity.
- * @returns {object[]|null} The items, or null where the cache carries no labels.
+ * @param {ArrayLike<number|null} [M]  The draw's matrix, or null for the identity.
+ * @returns {object[]|null} The items, or null where the cache has no labels.
  * @ignore
  */
 function _placeLabels(g, M) {
@@ -224,7 +220,7 @@ function _placeLabels(g, M) {
  *
  * `opts.identify` is a sink, and the draw places the labels it filled: each is
  * handed to it as `identify(id, text, x, y, z)`, the anchor in world space and
- * the id `<cache name>:<index>` (§7 #130).
+ * the id `<cache name>:<index>`.
  * @param {object} ctx  The context record.
  * @param {object} g  A cache entry, filled.
  * @param {{ M?:ArrayLike<number>, color?:number[], width?:number, depth?:boolean, dpr?:number,

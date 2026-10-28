@@ -15,7 +15,7 @@
  * WebGPU, at the bottom on GL. `target` is passed through as it comes — `SCREEN`
  * (null) is the drawing buffer, which GL can read and a WebGPU presentation
  * surface cannot, so it is the **backend** that says which reads it can answer
- * and the bridge's verb that states the refusal (§7 #125).
+ * and the bridge's verb that states the refusal.
  *
  * `pick` draws the scene into a **cached 1 × 1 target** under the installed
  * projection narrowed onto the query pixel by tree's `mat4Pick`, calling the
@@ -33,11 +33,11 @@
  *   buffer's are two different questions, and the bridges answer them.
  * - `opts.program` — the id program. The backend's flat program serves a
  *   covering quad; a scene of meshes passes its own, because a WebGPU pipeline
- *   bakes the vertex layout and a GL id program may displace or skin (§7 #112).
+ *   bakes the vertex layout and a GL id program may displace or skin.
  * - `opts.sync` — read the pixel in the same call, stalling the GPU. The read
  *   happens **while the pick target is still bound**, and the option is the
  *   backend's: the reference answers in the same tick, a backend without the
- *   form answers a frame later and the promise is the same (§7 #125).
+ *   form answers a frame later and the promise is the same.
  */
 
 'use strict';

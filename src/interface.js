@@ -65,26 +65,25 @@
  * `width` in device pixels, `vp`, `texture`, `depth`, `count` — and translates it
  * into its own uniforms, topology and state. The layer never names a uniform of
  * a gizmo program; the six declared transforms are the draw policy's, and a
- * gizmo's are not those (§7 #126).
+ * gizmo's are not those.
  *
  * A spec may also carry `labels` and `identify`: the labelled items this draw
  * places (`{ id, text, x, y, z }`, the anchor in world space, the ids the
  * layer's) and the sink each is handed to. A backend forwards them —
  * `identify(item.id, item.text, item.x, item.y, item.z)` — and does nothing else
- * with them: what a label is belongs to the bridge's DOM, not to the API (§7
- * #130).
+ * with them: what a label is belongs to the bridge's DOM, not to the API.
  *
  * Picking. `readPixels(ctx, target, x, y, width, height, opts)` answers a
  * `Promise` of RGBA bytes for a block of a target's own pixels, row 0 in the
  * backend's `framebufferY` orientation; `opts` is the backend's own, the
  * reference's `sync` among them. The layer's `pick` reads one pixel of a 1 × 1
- * target through it (§7 #125).
+ * target through it.
  *
  * Textures. `createTexture(ctx, source, opts)` takes a source or the backend's
  * own descriptor and `uploadTexture(ctx, tex, source)` refreshes one;
  * `createCubeTexture(ctx, faces, opts)` takes six sources in the cube's order
  * (+X −X +Y −Y +Z −Z) — a face target on GL, a layer on WebGPU, which is why it
- * is its own member rather than a flag on the other (§7 #123) — and
+ * is its own member rather than a flag on the other — and
  * `textureSize(ctx, tex)` answers the record's size, which a pass reads for
  * `uTexelSize`.
  *

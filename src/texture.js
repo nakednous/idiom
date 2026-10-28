@@ -22,7 +22,7 @@
  * module.
  *
  * The backend's members are `createTexture(ctx, source, opts)` (a source on
- * twgl, a descriptor on the twin — `opts` are its own, §7 #112),
+ * twgl, a descriptor on the twin — `opts` are its own),
  * `uploadTexture(ctx, tex, source)`, `createCubeTexture(ctx, faces, opts)` and
  * `textureSize(ctx, tex)`.
  */

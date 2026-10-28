@@ -8,7 +8,7 @@
  * into the geometry a draw takes; `install` uploads the transforms a program
  * declares; `draw` installs them and calls the backend's own draw. `bind` stays
  * the bridge's — which program is bound is the record's `.prog` — and so does
- * the vertex layout: a bridge states it on the program it makes (§7 #112).
+ * the vertex layout: a bridge states it on the program it makes.
  *
  * ```
  * const geo = buffer(ctx, mesh)          // { position, normal, texcoord, indices, … }
@@ -176,7 +176,7 @@ export function updateBuffer(ctx, geometry, arrays, opts) {
 /**
  * Write a geometry's arrays into its own buffers, in place — the form a stream
  * uses: a queue write is ordered with submissions, not inside a command buffer,
- * so a draw that writes before it draws owns its slot (§7 #113).
+ * so a draw that writes before it draws owns its slot.
  * @param {object} ctx  The context record.
  * @param {object} geometry  A record `buffer` answered.
  * @param {object} arrays  The arrays shape, as `buffer` takes it.
