@@ -37,7 +37,7 @@
     "url": "git+https://github.com/nakednous/idiom.git"
   },
   "dependencies": {
-    "@nakednous/tree": "^0.0.34"
+    "@nakednous/tree": "^0.0.35"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.3",
