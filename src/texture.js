@@ -35,9 +35,14 @@ export const CUBE_FACES = ['+X', '-X', '+Y', '-Y', '+Z', '-Z'];
 /** A source's [width, height], where it has one. @ignore */
 function _sizeOf(source) {
   if (!source) return null;
-  if (typeof source.width === 'number' && typeof source.height === 'number') return [source.width, source.height];
-  if (typeof source.naturalWidth === 'number' && source.naturalWidth) return [source.naturalWidth, source.naturalHeight];
-  if (typeof source.videoWidth === 'number' && source.videoWidth) return [source.videoWidth, source.videoHeight];
+  // Intrinsic before declarative: an HTMLVideoElement's width and height are its
+  // attributes, 0 unless the markup sets them, while videoWidth and videoHeight
+  // are the decoded frame's — and an element with a width attribute still holds
+  // its own pixels. A pixel source has neither, and answers with its own pair.
+  // Nothing measures zero: a size is a pair of positive numbers or no size.
+  if (source.videoWidth > 0 && source.videoHeight > 0) return [source.videoWidth, source.videoHeight];
+  if (source.naturalWidth > 0 && source.naturalHeight > 0) return [source.naturalWidth, source.naturalHeight];
+  if (source.width > 0 && source.height > 0) return [source.width, source.height];
   return null;
 }
 

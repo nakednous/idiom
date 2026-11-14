@@ -52,6 +52,22 @@ test('upload: the texture is refreshed and its size follows the source', () => {
   assert.equal(upload(ctx, null, video), null);
 });
 
+// An HTMLVideoElement carries width and height attributes of their own — 0
+// unless the markup sets them — so the intrinsic pair has to win, or every
+// video measures zero and a pass divides by it. A canvas has no intrinsic size
+// and answers with its own; an element that has both keeps its pixels.
+test('the recorded size is the source\'s pixels: intrinsic first, and never zero', () => {
+  const fake = createFake();
+  const ctx = createContext(fake.backend);
+  const video = { videoWidth: 640, videoHeight: 360, width: 0, height: 0 };
+  assert.deepEqual(ctx.sizes.get(texture(ctx, video)), [640, 360], 'a video is its decoded frame, not its attributes');
+  const declared = { videoWidth: 640, videoHeight: 360, width: 320, height: 180 };
+  assert.deepEqual(ctx.sizes.get(texture(ctx, declared)), [640, 360], 'a width attribute does not override the pixels');
+  const canvas = { width: 300, height: 150 };
+  assert.deepEqual(ctx.sizes.get(texture(ctx, canvas)), [300, 150], 'a canvas is its own pair');
+  assert.equal(ctx.sizes.get(texture(ctx, { width: 0, height: 0 })), undefined, 'a pair of zeros is no size');
+});
+
 test('cubemap: six faces reach the backend in the cube\'s order, and the map is sized once', () => {
   const fake = createFake();
   const ctx = createContext(fake.backend);
